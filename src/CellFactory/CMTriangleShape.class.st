@@ -17,31 +17,57 @@ CMTriangleShape class >> example [
 { #category : 'examples' }
 CMTriangleShape class >> exampleBottom [
 
-	(self new orientation: #bottom; position: self positionInSpace; yourself) show
+	self newBottom show
 ]
 
 { #category : 'examples' }
 CMTriangleShape class >> exampleLeft [
 
-	(self new orientation: #left; position: self positionInSpace; yourself) show
+	self newLeft show
 ]
 
 { #category : 'examples' }
 CMTriangleShape class >> exampleRight [
 
-	(self new orientation: #right; position: self positionInSpace; yourself) show
+	self newRight show
 ]
 
 { #category : 'examples' }
 CMTriangleShape class >> exampleTop [
 
-	(self new orientation: #top; position: self positionInSpace; yourself) show
+	self newTop show
 ]
 
-{ #category : 'geometry position' }
-CMTriangleShape class >> positionInSpace [
+{ #category : 'instance creation' }
+CMTriangleShape class >> newBottom [
 
-	^ 200@200
+	^ self new
+		orientation: #bottom;
+		yourself
+]
+
+{ #category : 'instance creation' }
+CMTriangleShape class >> newLeft [
+
+	^ self new
+		orientation: #left;
+		yourself
+]
+
+{ #category : 'instance creation' }
+CMTriangleShape class >> newRight [
+
+	^ self new
+		orientation: #right;
+		yourself
+]
+
+{ #category : 'instance creation' }
+CMTriangleShape class >> newTop [
+
+	^ self new
+		orientation: #top;
+		yourself
 ]
 
 { #category : 'examples' }

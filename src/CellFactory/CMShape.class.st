@@ -31,13 +31,19 @@ CMShape >> color: aColor [
 CMShape >> element [
     | cell |
     cell := BlElement new
-        "extent: self extent; "
+        extent: self extent; 
         background: color;
         position: position;
         border: (BlBorder paint: borderColor width: borderWidth).
 
     cell geometry: self geometry.
     ^ cell
+]
+
+{ #category : 'accessing' }
+CMShape >> extent [
+
+	self subclassResponsibility
 ]
 
 { #category : 'accessing' }
@@ -62,10 +68,19 @@ CMShape >> position: aPoint [
 
 { #category : 'host space - displaying' }
 CMShape >> show [
-    | space |
-    space := BlSpace new.
-    space root addChild: self element.
-    space show.
+	| spacePresenter element space |
+	spacePresenter := SpBlSpaceInMorphPresenter new.
+	space := spacePresenter space.
+	space root layout: BlFrameLayout new.
+	
+	element := self element.
+	
+	element constraintsDo: [ :c |
+		c frame vertical alignCenter.
+		c frame horizontal alignCenter ].
+		
+	space root addChild: element.
+	spacePresenter open.
 ]
 
 { #category : 'accessing' }

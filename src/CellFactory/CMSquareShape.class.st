@@ -5,9 +5,21 @@ Class {
 	#package : 'CellFactory'
 }
 
+{ #category : 'examples' }
+CMSquareShape class >> example [
+
+	self new show
+]
+
+{ #category : 'examples' }
+CMSquareShape >> example [
+
+	<script: 'self example'>
+]
+
 { #category : 'accessing' }
 CMSquareShape >> extent [
-    ^ (size * (2 sqrt)) @ (size * (2 sqrt))
+    ^ size @ size
 ]
 
 { #category : 'accessing' }

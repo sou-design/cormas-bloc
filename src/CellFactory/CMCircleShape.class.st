@@ -5,6 +5,12 @@ Class {
 	#package : 'CellFactory'
 }
 
+{ #category : 'examples' }
+CMCircleShape class >> example [
+
+	self new show
+]
+
 { #category : 'accessing' }
 CMCircleShape >> extent [
     ^ (size * 2) @ (size * 2)
