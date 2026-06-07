@@ -41,6 +41,6 @@ BaselineOfCormasBloc >> declareCormasOn: spec [
 BaselineOfCormasBloc >> declareEcecOn: spec [
 
 	spec
-		baseline: 'ECEC'
+		baseline: 'ECECModel'
 		with: [ spec repository: 'github://cormas/ecec-model' ]
 ]
