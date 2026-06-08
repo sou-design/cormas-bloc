@@ -57,8 +57,7 @@ CMBlAgentBuilder >> colorOfAgent: anAgent [
 
 { #category : 'as yet unclassified' }
 CMBlAgentBuilder >> createElementForCell: agent size: aSize pos: position [
-	| shape |
-	shape := self shapeElementClass new
+	shape := (self shapeElementClassFor: agent pov shape) new
 		size: aSize;
 		color: (self colorOfAgent: agent);
 		borderColor: (self borderColorOfAgent: agent);
@@ -108,7 +107,6 @@ CMBlAgentBuilder >> example [
 { #category : 'initialization' }
 CMBlAgentBuilder >> initialize [
 	super initialize.
-	shapeType := #circle.
 	shapeSize := 5.
 
 ]
@@ -130,12 +128,12 @@ CMBlAgentBuilder >> shape [
 ]
 
 { #category : 'as yet unclassified' }
-CMBlAgentBuilder >> shapeElementClass [
-	shapeType = #circle ifTrue: [ ^CMCircleShape ].
-	shapeType = #triangle ifTrue: [ ^ CMTriangleShape ].
-	shapeType = #square ifTrue: [ ^ CMSquareShape ].
-	shapeType = #pointyHex ifTrue: [ ^ CMPointyTopHexagonShape ].
-	shapeType = #flat6 ifTrue: [ ^ CMFlatTopHexagonShape ].
+CMBlAgentBuilder >> shapeElementClassFor: aSymbol [
+	aSymbol = #circle ifTrue: [ ^CMCircleShape ].
+	aSymbol = #triangle ifTrue: [ ^ CMTriangleShape ].
+	aSymbol = #square ifTrue: [ ^ CMSquareShape ].
+	aSymbol = #pointyHex ifTrue: [ ^ CMPointyTopHexagonShape ].
+	aSymbol = #flat6 ifTrue: [ ^ CMFlatTopHexagonShape ].
 ]
 
 { #category : 'private - layout' }
