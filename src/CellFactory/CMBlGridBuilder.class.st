@@ -5,7 +5,7 @@ Class {
 		'cormasModel',
 		'shapeSize',
 		'spacing',
-		'degree',
+		'neighborhood',
 		'gridElement',
 		'cellElements',
 		'shapeExtent'
@@ -50,61 +50,65 @@ CMBlGridBuilder >> borderWidthOfCell: aCell [
 
 { #category : 'building' }
 CMBlGridBuilder >> buildPresenter [
-	
-	| spacePresenter space|
+	| spacePresenter space cellExtent lastCellPosition gridSize |
 	
 	cellElements := Dictionary new.
-	gridElement := BlElement new.
-	gridElement extent: ( self step x * self numberOfRows) @ (self step y * self numberOfColumns).
-
+	neighborhood := self neighborhoodCount.
+	
+	cellExtent := (self cellElementClass new size: shapeSize; yourself) extent.
+	
+	lastCellPosition := 0.0 @ 0.0.
 	1 to: self numberOfRows do: [ :row |
 		1 to: self numberOfColumns do: [ :col |
-			| cell position shape |
+			| pos |
+			pos := self position: row col: col.
+			lastCellPosition := (lastCellPosition x max: pos x) @ (lastCellPosition y max: pos y) ] ].
+	
+	gridSize := lastCellPosition + cellExtent.
+	
+	gridElement := BlElement new.
+	gridElement layout: BlBasicLayout new.
+	gridElement constraintsDo: [ :c |
+		c horizontal exact: gridSize x.
+		c vertical exact: gridSize y ].
+	
+	1 to: self numberOfRows do: [ :row |
+		1 to: self numberOfColumns do: [ :col |
+			| cell position shape el |
 			cell := cormasModel cellAt: row at: col.
-			
 			position := self position: row col: col.
-
- 			shape := self cellElementClass new
+			shape := self cellElementClass new
 				size: shapeSize;
 				position: position;
- 				color: (self colorOfCell: cell);
+				color: (self colorOfCell: cell);
 				borderColor: (self borderColorOfCell: cell);
 				borderWidth: (self borderWidthOfCell: cell) * shapeSize * 2;
 				yourself.
-				
-				self setOrientation: row col: col shape: shape.
-			
-			gridElement addChild: shape element. 
-			shapeExtent:= shape extent.
-			cellElements
-                at: row @ col
-                put: shape element
-			
-			
-			] ].
+			self setOrientation: row col: col shape: shape.
+			el := shape element.
+			el position: position.
+			gridElement addChild: el.
+			shapeExtent := cellExtent.
+			cellElements at: row @ col put: el ] ].
 	
 	spacePresenter := SpBlSpaceInMorphPresenter new.
 	space := spacePresenter space.
-	
-space root layout: BlFrameLayout new.
-
-    gridElement constraintsDo: [ :c |
-        c frame vertical alignCenter.
-        c frame horizontal alignCenter
-    ].
-	
+	space root layout: BlFrameLayout new.
+	gridElement constraintsDo: [ :c |
+		c frame vertical alignCenter.
+		c frame horizontal alignCenter ].
 	space root addChild: gridElement.
-
 	^ spacePresenter
 ]
 
 { #category : 'as yet unclassified' }
 CMBlGridBuilder >> cellElementClass [
-
-    degree = 3 ifTrue: [ ^ CMTriangleShape ].
-    degree = 4 ifTrue: [ ^ CMSquareShape ].
-    degree = 6 ifTrue: [ ^ CMPointyTopHexagonShape ].
-	 degree = #flat6 ifTrue: [ ^ CMFlatTopHexagonShape ].
+	Transcript showCr: 'neighborhood value: ' , neighborhood printString.
+   neighborhood = 3 ifTrue: [ ^ CMTriangleShape ].
+   neighborhood = 4 ifTrue: [ ^ CMSquareShape ].
+   neighborhood = 6 ifTrue: [ ^ CMPointyTopHexagonShape ].
+	neighborhood = #flat6 ifTrue: [ ^ CMFlatTopHexagonShape ].
+	neighborhood = 8 ifTrue: [ ^ CMSquareShape ].
  
 ]
 
@@ -118,11 +122,6 @@ CMBlGridBuilder >> colorOfCell: aCell [
 CMBlGridBuilder >> cormasModel: aCormasModel [
 
 	cormasModel := aCormasModel
-]
-
-{ #category : 'accessing' }
-CMBlGridBuilder >> degree: aNumber [
-	degree := aNumber.
 ]
 
 { #category : 'as yet unclassified' }
@@ -150,10 +149,25 @@ CMBlGridBuilder >> gridElement [
 
 { #category : 'initialization' }
 CMBlGridBuilder >> initialize [
-    super initialize.
-    shapeSize := 50.
-    spacing := 0.
-	 degree:= 6.
+   super initialize.
+   shapeSize := 50.
+   spacing := 0.
+
+	
+]
+
+{ #category : 'accessing' }
+CMBlGridBuilder >> neighborhood: aNumber [
+	neighborhood := aNumber.
+]
+
+{ #category : 'accessing' }
+CMBlGridBuilder >> neighborhoodCount [
+    | name neighbours |
+    name := cormasModel spaceModel neighbourhoodConfiguration class name.
+    neighbours := (name select: [ :c | c isDigit ]) asInteger.
+    (neighbours = 6 and: [ name includesSubstring: 'FlatTop' ]) ifTrue: [ ^ #flat6 ].
+    ^ neighbours
 ]
 
 { #category : 'accessing' }
@@ -175,22 +189,22 @@ CMBlGridBuilder >> position: aRow col: aCol [
 
 	x := y := step := offsetX := offsetY :=0.
     step := self step.
-    degree = 6 ifTrue: [
+    neighborhood = 6 ifTrue: [
         offsetX := step x / 2.
     ].
 
-    degree = #flat6 ifTrue: [
+    neighborhood = #flat6 ifTrue: [
         offsetY := step y / 2.
     ].
 
     x := (aCol - 1) * (step x + spacing).
     y := (aRow - 1) * (step y + spacing).
 
-    degree = 6 ifTrue: [
+    neighborhood = 6 ifTrue: [
         (aRow even) ifTrue: [ x := x + offsetX ].
     ].
 
-    degree = #flat6 ifTrue: [
+    neighborhood = #flat6 ifTrue: [
         (aCol even) ifTrue: [ y := y + offsetY ].
     ].
  	^ x @ y
@@ -204,7 +218,7 @@ CMBlGridBuilder >> povOfCell: aCell [
 
 { #category : 'as yet unclassified' }
 CMBlGridBuilder >> setOrientation: aRow col: aCol shape: aShape [
-	degree = 3 ifTrue: [
+	neighborhood = 3 ifTrue: [
 								aShape orientation: ((aRow + aCol ) odd
 								ifTrue: [ #top ]
 								ifFalse: [ #bottom ]).
@@ -233,19 +247,18 @@ CMBlGridBuilder >> spacing: aNumber [
 
 { #category : 'stepping' }
 CMBlGridBuilder >> step [
-    degree = 3 ifTrue: [
+    neighborhood = 3 ifTrue: [
         ^ (3 sqrt / 2) @ (3 / 2) * shapeSize
     ].
 
-    degree = 4 ifTrue: [
-        ^ (1 @ 1) * shapeSize
-    ].
+	(neighborhood = 4 or: [ neighborhood = 8 ]) ifTrue: [ ^ (1 @ 1) * shapeSize ].
 
-    degree = 6 ifTrue: [
+
+    neighborhood = 6 ifTrue: [
         ^ (3 sqrt @ (3 / 2)) * shapeSize
     ].
 
-    degree = #flat6 ifTrue: [
+    neighborhood = #flat6 ifTrue: [
         ^ ((3 / 2) @ (3 sqrt)) * shapeSize
     ].
 ]

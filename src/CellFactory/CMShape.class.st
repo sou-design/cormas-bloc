@@ -29,15 +29,19 @@ CMShape >> color: aColor [
 
 { #category : 'accessing' }
 CMShape >> element [
-    | cell |
-    cell := BlElement new
-        extent: self extent; 
-        background: color;
-        position: position;
-        border: (BlBorder paint: borderColor width: borderWidth).
-
-    cell geometry: self geometry.
-    ^ cell
+	| cell halfExtent geometry |
+	halfExtent := (self extent x / 2) @ (self extent y / 2).
+	geometry := self geometry.
+	(geometry respondsTo: #vertices) ifTrue: [
+		geometry := BlPolygonGeometry vertices: 
+			(geometry vertices collect: [ :v | v + halfExtent ]) ].
+	cell := BlElement new
+		extent: self extent; 
+		background: color;
+		position: position;
+		border: (BlBorder paint: borderColor width: borderWidth).
+	cell geometry: geometry.
+	^ cell
 ]
 
 { #category : 'accessing' }

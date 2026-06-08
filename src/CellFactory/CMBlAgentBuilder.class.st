@@ -57,64 +57,47 @@ CMBlAgentBuilder >> colorOfAgent: anAgent [
 
 { #category : 'as yet unclassified' }
 CMBlAgentBuilder >> createElementForCell: agent size: aSize pos: position [
-
-	| agentElement shape shapeElement |
-	agentElement := BlElement new.
-	shape := self shapeElementClass new.
-
-	shape
-		size: aSize ;
+	| shape |
+	shape := self shapeElementClass new
+		size: aSize;
 		color: (self colorOfAgent: agent);
 		borderColor: (self borderColorOfAgent: agent);
-		borderWidth: (self borderWidthOfAgent: agent) * aSize x;
+		borderWidth: (self borderWidthOfAgent: agent);
 		yourself.
-
-	shapeElement := shape element.
-	shapeElement extent: aSize .
-	agentElement
-		extent: aSize ;
-		position: position.
-
-	agentElement addChild: shapeElement.
-
-	^ agentElement
+	^ shape element
+		extent: aSize @ aSize;
+		position: position;
+		yourself
 ]
 
 { #category : 'as yet unclassified' }
 CMBlAgentBuilder >> displayOn: aGrid model: aModel cellSize: aCellSize agentSize: anAgentSize [
-
-	| config positionInCell cell cellCoordinates intersectionProportion shiftProportionX shiftProportionY shiftProportion intersectionOffset offset agentPos el cellElement |
+	| config positionInCell cell cellCoordinates intersectionProportion shiftProportion intersectionOffset offset agentPos el |
 	
 	config := aModel spaceModel neighbourhoodConfiguration.
-	positionInCell := 0.5@0.5.
-
-   aModel agents do: [ :agent |
+	positionInCell := 0.5 @ 0.5.
+	
+	aModel agents do: [ :agent |
 		cell := agent cell.
-		cellElement := aGrid elementForCell: cell.
 		
 		cellCoordinates := cell columnNumber @ cell rowNumber.
 		
-		intersectionProportion :=
-			config boundingRectangleHorizontalIntersection @
-			config boundingRectangleVerticalIntersection.
-			
-		shiftProportionX := cell rowNumber even
+		intersectionProportion := config boundingRectangleHorizontalIntersection 
+			@ config boundingRectangleVerticalIntersection.
+		
+		shiftProportion := (cell rowNumber even
 			ifTrue: [ config boundingRectangleHorizontalShiftEven ]
-			ifFalse: [ config boundingRectangleHorizontalShiftOdd ].
-		
-		shiftProportionY := cell columnNumber even
+			ifFalse: [ config boundingRectangleHorizontalShiftOdd ])
+			@ (cell rowNumber even
 			ifTrue: [ config boundingRectangleVerticalShiftEven ]
-			ifFalse: [ config boundingRectangleVerticalShiftOdd ].
+			ifFalse: [ config boundingRectangleVerticalShiftOdd ]).
 		
-		shiftProportion := shiftProportionX @ shiftProportionY.
-	
 		intersectionOffset := (cellCoordinates - 1) * intersectionProportion.
 		offset := (cellCoordinates - 1) - intersectionOffset + shiftProportion.
-
-    	agentPos :=  (offset + positionInCell - config cellShapeOriginOffset) * aCellSize - (anAgentSize/2).
+		agentPos := (offset + positionInCell - config cellShapeOriginOffset) * aCellSize - (anAgentSize / 2).
+		
 		el := self createElementForCell: agent size: anAgentSize pos: agentPos.
 		aGrid gridElement addChild: el ].
-
 ]
 
 { #category : 'examples' }
